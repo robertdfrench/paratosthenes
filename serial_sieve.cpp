@@ -38,17 +38,45 @@ void apply_sieve(std::vector<int> &range, std::vector<int> primes) {
 	}
 }
 
+void capture_primes_from_range(std::vector<int> &range, std::vector<int> &primes) {
+	for(std::vector<int>::iterator it = range.begin(); it != range.end(); ++it) {
+		if(*it != 0) {
+			primes.push_back(*it);
+		}
+	}
+}
+
+void print_list(std::vector<int> &list) {
+	for(std::vector<int>::iterator it = list.begin(); it != list.end(); ++it) {
+		std::cout << *it << ",";
+	}
+	std::cout << "\n";
+}
+
+#define MAX_PRIME 5000
 int main(int argc, char** argv) {
+	std::cout << "Finding all primes less than " << MAX_PRIME << "\n";
+	
+	// Initialize Primes
 	std::vector<int> primes;
 	primes.push_back(2);
 	primes.push_back(3);
 	primes.push_back(5);
-	std::vector<int> range = generate_range(6, 25);
-	apply_sieve(range, primes);
 
-	for(std::vector<int>::iterator it = range.begin(); it != range.end(); ++it) {
-		std::cout << *it << ",";
+
+	bool perform_another_sieve = (primes.back() < MAX_PRIME);
+	while(perform_another_sieve) {
+		int start = primes.back() + 1;
+		int stop = primes.back() * primes.back();
+		if (stop >= MAX_PRIME) {
+			stop = MAX_PRIME;
+		}
+		std::vector<int> range = generate_range(start, stop);
+		apply_sieve(range, primes);
+		capture_primes_from_range(range, primes);
+		print_list(primes);
+		perform_another_sieve = (stop < MAX_PRIME);
 	}
-	std::cout << "\n";
+
 	return 0;
 }
