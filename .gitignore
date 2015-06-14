@@ -1,3 +1,4 @@
 *.prof
 a.out
 callgrind.out.*
+*.swp
