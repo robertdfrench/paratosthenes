@@ -4,21 +4,26 @@
 #include <string>
 
 #define MAX_INTERVAL_SIZE 1024 * 1024 * 10
-class SieveInterval {
+class ResizeableSieveInterval {
 		uint64_t lb;
 		uint64_t ub;
 		std::vector<uint64_t> interval;
 	public:
 		SieveInterval(uint64_t lowerbound, uint64_t upperbound) 
-			: lb{lowerbound}, ub{upperbound} 
 		{
+			interval.reserve(MAX_INTERVAL_SIZE);
+			resize(lowerbound, upperbound);
+		};
+		void resize(uint64_t lowerbound, uint64_t upperbound) {
+			lb = lowerbound;
+			ub = upperbound;
 			if (ub - lb > MAX_INTERVAL_SIZE) {
 				ub = lb + MAX_INTERVAL_SIZE;
 			}
 			for(uint64_t i = lb; i <= ub; i++) {
 				interval.push_back(i);
 			}
-		};
+		}
 		uint64_t lowerbound() const {
 			return lb;
 		};
