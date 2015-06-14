@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-#define MAX_INTERVAL_SIZE 1024 * 1024 * 100
+#define MAX_INTERVAL_SIZE 1024 * 1024 * 10
 class ResizeableSieveInterval {
 		uint64_t lb;
 		uint64_t ub;
