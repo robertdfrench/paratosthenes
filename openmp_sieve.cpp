@@ -85,8 +85,9 @@ void mark_multiples_of_prime(uint64_t prime, ResizeableSieveInterval& si) {
 }
 
 void apply_sieve(ResizeableSieveInterval& si, std::vector<uint64_t> primes) {
-	for(std::vector<uint64_t>::iterator it = primes.begin(); it != primes.end(); ++it) {
-		uint64_t p = *it;
+  #pragma omp parallel
+  for(int i = 0; i < primes.size(); i++) {
+		uint64_t p = primes.at(i);
 		mark_multiples_of_prime(p, si);
 	}
 }
