@@ -1,81 +1,97 @@
 #include <iostream>
 #include <vector>
+#include <cstdint>
+#include <string>
 
-std::vector<int> generate_range(int lowerbound, int upperbound) {
-	int length = upperbound - lowerbound;
-	std::vector<int> range;
-	for(int i = lowerbound; i <= upperbound; i++) {
-		range.push_back(i);
-	}
-	return range;
-}
+#define MAX_INTERVAL_SIZE 1024 * 1024 * 10
+class SieveInterval {
+		uint64_t lb;
+		uint64_t ub;
+		std::vector<uint64_t> interval;
+	public:
+		SieveInterval(uint64_t lowerbound, uint64_t upperbound) 
+			: lb{lowerbound}, ub{upperbound} 
+		{
+			if (ub - lb > MAX_INTERVAL_SIZE) {
+				ub = lb + MAX_INTERVAL_SIZE;
+			}
+			for(uint64_t i = lb; i <= ub; i++) {
+				interval.push_back(i);
+			}
+		};
+		uint64_t lowerbound() const {
+			return lb;
+		};
+		uint64_t upperbound() const {
+			return ub;
+		};
+		void mark_composite(uint64_t composite) {
+			uint64_t index = composite - lb;
+			interval.at(index) = 0;
+		};
+		void append_primes(std::vector<uint64_t> &primes) {
+			
+			for(std::vector<uint64_t>::iterator it = interval.begin(); it != interval.end(); ++it) {
+				uint64_t p = *it;
+				if (p != 0) {
+					primes.push_back(p);
+				}
+			}
+		};
+		friend std::ostream& operator<< (std::ostream& o, const SieveInterval& si) {
+				return o << "[" << si.lowerbound() << "," << si.upperbound() << "]";
+		};
+};
 
-void mark_composites_in_range(int prime, std::vector<int> &range, int lowerbound, int upperbound) {
+void mark_multiples_of_prime(uint64_t prime, SieveInterval& si) {
 	// Determine smallest composite in range (start)
-	int lb_mod_p = (lowerbound % prime);
-	int start = (lb_mod_p == 0) ? lowerbound : lowerbound - lb_mod_p + prime;
+	uint64_t lowerbound = si.lowerbound();
+	uint64_t lb_mod_p = (lowerbound % prime);
+	uint64_t start = (lb_mod_p == 0) ? lowerbound : lowerbound - lb_mod_p + prime;
 
 	// Determine largest composite in range (stop)
-	int ub_mod_p = (upperbound % prime);
-	int stop = upperbound - ub_mod_p;
+	uint64_t upperbound = si.upperbound();
+	uint64_t ub_mod_p = (upperbound % prime);
+	uint64_t stop = upperbound - ub_mod_p;
 
-	// Adjust for appropriate index range
-	start = start - lowerbound;
-	stop = stop - lowerbound;
-	for(int index = start; index <= stop; index += prime) {
-		std::cout << "\tMarking " << index + lowerbound << " as 0 at position " << index << "\n";
-		range.at(index) = 0;
-	}
-}
-
-void apply_sieve(std::vector<int> &range, std::vector<int> primes) {
-	int lowerbound = range.front();
-	int upperbound = range.back();
-	for(std::vector<int>::iterator it = primes.begin(); it != primes.end(); ++it) {
-		int p = *it;
-		std::cout << "Attempting to sieve for prime " << p << "\n";
-		mark_composites_in_range(p, range, lowerbound, upperbound);
-	}
-}
-
-void capture_primes_from_range(std::vector<int> &range, std::vector<int> &primes) {
-	for(std::vector<int>::iterator it = range.begin(); it != range.end(); ++it) {
-		if(*it != 0) {
-			primes.push_back(*it);
+	for(uint64_t composite = start; composite <= stop; composite += prime) {
+		try {
+				si.mark_composite(composite);
+		} catch (std::out_of_range e) {
+			std::cout << "Could not mark composite " << composite << " in " << si << std::endl;
+			exit(0);
 		}
 	}
 }
 
-void print_list(std::vector<int> &list) {
-	for(std::vector<int>::iterator it = list.begin(); it != list.end(); ++it) {
-		std::cout << *it << ",";
+void apply_sieve(SieveInterval& si, std::vector<uint64_t> primes) {
+	for(std::vector<uint64_t>::iterator it = primes.begin(); it != primes.end(); ++it) {
+		uint64_t p = *it;
+		mark_multiples_of_prime(p, si);
 	}
-	std::cout << "\n";
 }
 
-#define MAX_PRIME 5000
 int main(int argc, char** argv) {
+	uint64_t MAX_PRIME = std::stoull(argv[1]);
 	std::cout << "Finding all primes less than " << MAX_PRIME << "\n";
 	
 	// Initialize Primes
-	std::vector<int> primes;
+	std::vector<uint64_t> primes;
 	primes.push_back(2);
 	primes.push_back(3);
 	primes.push_back(5);
 
-
 	bool perform_another_sieve = (primes.back() < MAX_PRIME);
 	while(perform_another_sieve) {
-		int start = primes.back() + 1;
-		int stop = primes.back() * primes.back();
-		if (stop >= MAX_PRIME) {
-			stop = MAX_PRIME;
-		}
-		std::vector<int> range = generate_range(start, stop);
-		apply_sieve(range, primes);
-		capture_primes_from_range(range, primes);
-		print_list(primes);
-		perform_another_sieve = (stop < MAX_PRIME);
+		uint64_t lowerbound = primes.back() + 1;
+		uint64_t upperbound = primes.back() * primes.back();
+		if(upperbound > MAX_PRIME) { upperbound = MAX_PRIME; }
+		SieveInterval si(lowerbound, upperbound);
+		std::cout << "Applying Sieve to " << si << " -- ";
+		apply_sieve(si, primes);
+		si.append_primes(primes);
+		std::cout << primes.size() << " primes" << std::endl;
+		perform_another_sieve = (si.upperbound() < MAX_PRIME);
 	}
 
 	return 0;
