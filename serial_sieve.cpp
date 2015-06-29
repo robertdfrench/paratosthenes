@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <stdexcept>
 
 #define MAX_INTERVAL_SIZE 1024 * 1024 * 10
 class ResizeableSieveInterval {
@@ -28,7 +29,7 @@ class ResizeableSieveInterval {
 					} else {
 				    interval.at(index) = i;
 					}
-				} catch (std::out_of_range e) {
+				} catch (const std::out_of_range& e) {
 				  std::cout << "Could not access index " << i - lb << " in " << this << "during resize" << std::endl;
 					exit(0);
 				}
