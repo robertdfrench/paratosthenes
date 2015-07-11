@@ -3,9 +3,10 @@
 #include <cstdint>
 #include <string>
 #include <stdexcept>
+#include <omp.h>
 
 #define COMPOSITE 0
-#define MAX_STORAGE_SIZE 1024 * 1024 * 10
+#define MAX_STORAGE_SIZE 1024 * 1024 * 100
 enum SearchIntervalState { SIS_NEW, SIS_READY, SIS_ACTIVE, SIS_INCONSISTENT };
 class SearchInterval {
 		uint64_t  lb;
@@ -42,6 +43,7 @@ class SearchInterval {
 			initialize();
 		};
 		void initialize() {
+			#pragma omp parallel for
 			for(uint64_t i = 0; i < population; i++) {
 				internal_storage[i] = lb + i;
 			}
@@ -102,6 +104,7 @@ class SearchInterval {
 		};
 		void apply_sieve(std::vector<uint64_t> primes) {
 			state = SIS_ACTIVE;
+			#pragma omp parallel for
 			for(int i = 0; i < primes.size(); i++) {
 				uint64_t p = primes.at(i);
 				mark_multiples_of_prime(p);

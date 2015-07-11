@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #define COMPOSITE 0
-#define MAX_STORAGE_SIZE 1024 * 1024 * 10
+#define MAX_STORAGE_SIZE 1024 * 1024 * 100
 enum SearchIntervalState { SIS_NEW, SIS_READY, SIS_ACTIVE, SIS_INCONSISTENT };
 class SearchInterval {
 		uint64_t  lb;
