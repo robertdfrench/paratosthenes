@@ -13,6 +13,6 @@ endif()
 
 find_package(CUDA)
 if(CUDA_FOUND)
-	cuda_add_executable(Paratosthenes_cuda cuda_sieve.cpp)
+	cuda_add_executable(Paratosthenes_cuda cuda_sieve_support.cu cuda_sieve.cpp)
 	target_compile_features(Paratosthenes_cuda PRIVATE cxx_range_for)
 endif()
