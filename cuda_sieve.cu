@@ -8,6 +8,8 @@
 
 #define COMPOSITE 0
 #define MAX_STORAGE_SIZE 1024 * 1024 * 100
+
+__global__ void initialize_sieve_interval(uint64_t* storage, uint64_t lb, int length);
 enum SearchIntervalState { SIS_NEW, SIS_READY, SIS_ACTIVE, SIS_INCONSISTENT };
 class CudaSearchInterval {
 		uint64_t  lb;

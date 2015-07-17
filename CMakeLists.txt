@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.1.0 FATAL_ERROR)
 project (Paratosthenes)
-add_executable(Paratosthenes_serial serial_sieve.cpp)
-target_compile_features(Paratosthenes_serial PRIVATE cxx_range_for)
+#add_executable(Paratosthenes_serial serial_sieve.cpp)
+#target_compile_features(Paratosthenes_serial PRIVATE cxx_range_for)
 
 #find_package(OpenMP)
 #if(OPENMP_FOUND)
