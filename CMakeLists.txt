@@ -13,7 +13,20 @@ project (Paratosthenes)
 
 find_package(CUDA)
 if(CUDA_FOUND)
-	set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3 -gencode arch=compute_35,code=sm_35)
-	cuda_add_executable(Paratosthenes_cuda cuda_sieve_support.cu cuda_sieve.cu)
-	target_compile_features(Paratosthenes_cuda PRIVATE cxx_range_for)
+	set(AppName "Paratosthenes_cuda")
+	set(LibName "${AppName}_lib")
+	set(LibName_Cuda "${AppName}_lib_cuda")
+	set(CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}")
+	set(CUDA_PROPAGATE_HOST_FLAGS ON)
+	list(APPEND CUDA_NVCC_FLAGS "-arch=sm_35;-std=c++11;-O2;-DVERBOSE")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+	#set_target_properties(${AppName} PROPERTIES COMPILE_FLAGS "-std=c++11")
+
+
+	cuda_add_library(${LibName_Cuda} cuda_search_interval.cpp cuda_search_interval.h cuda_search_interval.cu)
+	#set_target_properties(${LibName} PROPERTIES COMPILE_FLAGS "-std=c++11")
+
+	add_executable(${AppName} cuda_sieve.cpp)
+	set_target_properties(${AppName} PROPERTIES COMPILE_FLAGS "-std=c++11")
+	target_link_libraries(${AppName} ${LibName_Cuda})
 endif()
