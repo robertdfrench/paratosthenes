@@ -22,11 +22,11 @@ int main(int argc, char** argv) {
 		if(upperbound > MAX_PRIME) { upperbound = MAX_PRIME; }
 		si.repopulate(lowerbound, upperbound);
 		std::cout << "Applying Sieve to " << si << " -- ";
-		si.apply_sieve(primes);
-//		std::vector<uint64_t> new_primes = si.get_primes();
-//		primes.insert(primes.end(), new_primes.begin(), new_primes.end());
-//		std::cout << primes.size() << " primes" << std::endl;
-//		perform_another_sieve = (si.upperbound() < MAX_PRIME);
+		std::vector<uint64_t> new_primes;
+		si.apply_sieve(primes, new_primes);
+		primes.insert(primes.end(), new_primes.begin(), new_primes.end());
+		std::cout << primes.size() << " primes" << std::endl;
+		perform_another_sieve = (si.upperbound() < MAX_PRIME);
 	}
 
 	return 0;

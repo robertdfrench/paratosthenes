@@ -71,7 +71,7 @@ class SearchInterval {
 			// than largest multiple of prime in interval
 			uint64_t residue = ub % prime;
 			return ub - residue;
-		}
+		};
 		void mark_composite(uint64_t composite) {
 			uint64_t index = composite - lb;
 			if (index <= population) {

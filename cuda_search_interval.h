@@ -24,6 +24,6 @@ class CudaSearchInterval {
 		void mark_composite(uint64_t composite);
 		std::vector<uint64_t> get_primes();
 		void mark_multiples_of_prime(uint64_t prime);
-		void apply_sieve(const std::vector<uint64_t>& primes);
+		void apply_sieve(const std::vector<uint64_t>& primes, std::vector<uint64_t>& new_primes);
 		friend std::ostream& operator<< (std::ostream& o, const CudaSearchInterval& si);
 };
