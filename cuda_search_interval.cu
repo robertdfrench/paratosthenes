@@ -1,6 +1,8 @@
 #include "cuda_search_interval.h"
 
+#include <iostream>
 #include <cstdint>
+#include <exception>
 
 #include "cuda_runtime.h"
 #include "cuda.h"
@@ -49,7 +51,7 @@ void CudaSearchInterval::apply_sieve(const std::vector<uint64_t>& primes, std::v
 	// Transfer primes to device
 	state = SIS_ACTIVE;
 	device_status = cudaMemcpy(device_primes, host_primes, num_bytes, cudaMemcpyHostToDevice);
-	if (device_status != cudaSuccess) { state = SIS_INCONSISTENT; return; }
+	if (device_status != cudaSuccess) { state = SIS_INCONSISTENT; return;}
 
 	// Apply sieve to composite storage
 	dim3 threads_per_block(32,32);
@@ -59,7 +61,7 @@ void CudaSearchInterval::apply_sieve(const std::vector<uint64_t>& primes, std::v
 	// Transfer primes back to host
 	uint64_t* new_host_primes = (uint64_t*)malloc(num_bytes);
 	device_status = cudaMemcpy(new_host_primes, device_primes, num_bytes, cudaMemcpyDeviceToHost);
-	if (device_status != cudaSuccess) { state = SIS_INCONSISTENT; return; }
+	if (device_status != cudaSuccess) { state = SIS_INCONSISTENT; return;}
 
 	// Sort primes
 	for(uint64_t i = 0; i < population; i++) {
@@ -74,5 +76,5 @@ void CudaSearchInterval::apply_sieve(const std::vector<uint64_t>& primes, std::v
 
 	// Deallocate device primes
 	device_status = cudaFree(device_primes);
-	if (device_status != cudaSuccess) { state = SIS_INCONSISTENT; return; }
+	if (device_status != cudaSuccess) { state = SIS_INCONSISTENT; return;}
 };
