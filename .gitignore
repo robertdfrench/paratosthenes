@@ -3,3 +3,4 @@ a.out
 callgrind.out.*
 *.swp
 build/*
+*.exe
