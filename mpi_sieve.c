@@ -5,6 +5,31 @@
 #include "mpi_sieve.h"
 
 #define PRIMES_TAG 123
+#define COMPOSITE 0
+
+void sieve(int* primes, int num_primes, int* composites, int num_composites) {
+	int pi = 0;
+	while(pi < num_primes) {
+		int ci = 0;
+		int p = primes[pi];
+		while(ci < num_composites) {
+			int c = composites[ci];
+			if (c % p == 0) {
+				composites[ci] = COMPOSITE;
+			}
+			ci++;
+		}
+		pi++;
+	}
+}
+
+void initialize_range(int* ints, int num_ints, int lower_bound) {
+	int i = 0;
+	while(i < num_ints) {
+		ints[i] = i + lower_bound;
+		i++;
+	}
+}
 
 void assert_valid_configuration(int comm_size) {
 	if (comm_size < 3) {
@@ -51,6 +76,15 @@ void print_ints(int* ints, int num_ints) {
 	fflush(stdout);
 }
 
+void drop_ints(int* ints, int num_ints) {
+	MPI_Send(ints, num_ints, MPI_INT, next_worker_id, PRIMES_TAG, MPI_COMM_WORLD);
+}
+
+void catch_ints(int* ints, int num_ints) {
+	MPI_Status status;
+	MPI_Recv(ints, num_ints, MPI_INT, previous_worker_id, PRIMES_TAG, MPI_COMM_WORLD, &status);
+}
+
 void top_main(int rank) {
 	int primes[3];
 	primes[0] = 2;
@@ -58,22 +92,40 @@ void top_main(int rank) {
 	primes[2] = 5;
 	printf("Hello from the top\n");
 	fflush(stdout);
-	MPI_Send(primes, 3, MPI_INT, next_worker_id, PRIMES_TAG, MPI_COMM_WORLD);
+
+	int* composites = (int*)malloc(sizeof(int) * 100);
+	initialize_range(composites, 100, 6);
+	sieve(primes, 3, composites, 100);
+	drop_ints(composites, 100);
+}
+
+int count_nonzeros(int* ints, int num_ints) {
+	int num_nonzeros = 0;
+	int i = 0;
+	while (i < num_ints) {
+		if (ints[i] != 0) {
+			num_nonzeros++;
+		}
+		i++;
+	}
+	return num_nonzeros;
 }
 
 void middle_main(int rank) {
 	int primes[3];
-	MPI_Status status;
-	MPI_Recv(primes, 3, MPI_INT, previous_worker_id, PRIMES_TAG, MPI_COMM_WORLD, &status);
-	primes[2] += rank;
-	printf("Stuck in the middle with you (rank %d): ", rank);
+	int* composites = (int*)malloc(sizeof(int) * 100);
+	catch_ints(composites, 100);
+
+	int num_relative_primes = count_nonzeros(composites, 100);
+	int* composites_pool = (int*)malloc(sizeof(int) * 100);
+	
+	
 	print_ints(primes, 3);
-	MPI_Send(primes, 3, MPI_INT, next_worker_id, PRIMES_TAG, MPI_COMM_WORLD);
+	drop_ints(primes, 3);
 }
 
 void bottom_main(int rank) {
 	int primes[3];
-	MPI_Status status;
-	MPI_Recv(primes, 3, MPI_INT, previous_worker_id, PRIMES_TAG, MPI_COMM_WORLD, &status);
+	catch_ints(primes, 3);
 	printf("You have reached the end\n");
 }
